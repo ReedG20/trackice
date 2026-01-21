@@ -5,7 +5,7 @@ import { useTheme } from "next-themes";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
-import { Map, Marker, Popup, NavigationControl, useMap } from "react-map-gl/mapbox";
+import { Map, Marker, Popup, useMap } from "react-map-gl/mapbox";
 import { useReport } from "@/components/report-context";
 import {
   Card,
@@ -39,6 +39,7 @@ import {
   ArrowRight01Icon,
 } from "@hugeicons/core-free-icons";
 import "mapbox-gl/dist/mapbox-gl.css";
+import "./map.css";
 
 const LIGHT_STYLE = "mapbox://styles/mapbox/light-v11";
 const DARK_STYLE = "mapbox://styles/mapbox/dark-v11";
@@ -335,7 +336,6 @@ function MapContent() {
 
   return (
     <>
-      <NavigationControl position="top-right" />
 
       {reports?.map((report) => (
         <Marker
@@ -375,6 +375,7 @@ export function MapView() {
       style={{ width: "100%", height: "100%" }}
       mapStyle={mapStyle}
       reuseMaps
+      attributionControl={false}
     >
       <MapContent />
     </Map>
