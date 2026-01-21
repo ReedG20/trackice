@@ -118,7 +118,7 @@ function ImageLightbox({
 
   return (
     <Dialog open={open} onOpenChange={(isOpen) => !isOpen && onClose()}>
-      <DialogContent className="max-w-3xl p-0 overflow-hidden bg-black/95 border-none">
+      <DialogContent className="max-w-3xl p-0 overflow-hidden bg-black/95 border-none" showCloseButton={false}>
         <DialogTitle className="sr-only">Image viewer</DialogTitle>
         <div className="relative flex items-center justify-center min-h-[60vh]">
           {/* Close button */}
