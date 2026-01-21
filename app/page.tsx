@@ -1,5 +1,9 @@
-import { ComponentExample } from "@/components/component-example";
+import { Map } from "@/components/map";
 
 export default function Page() {
-return <ComponentExample />;
+  return (
+    <main className="relative w-screen h-screen overflow-hidden">
+      <Map />
+    </main>
+  );
 }
