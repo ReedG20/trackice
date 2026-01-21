@@ -200,12 +200,12 @@ export function AppSidebar({ className }: { className?: string }) {
             <div className="space-y-0.5">
               <p className="text-sm font-medium leading-tight">Stay safe!</p>
               <p className="text-xs text-muted-foreground leading-snug">
-                Subscribe for SMS or email alerts in your area.
+                Subscribe to SMS or email alerts for your area.
               </p>
             </div>
           </div>
           <Button size="sm" className="w-full">
-            Subscribe
+            Get Alerts
           </Button>
         </div>
       </SidebarFooter>

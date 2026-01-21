@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, DM_Sans } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import "./globals.css";
 
@@ -46,7 +46,6 @@ export default function RootLayout({
           {/* Sidebar overlays on top */}
           <SidebarProvider className="sidebar-overlay fixed inset-0 z-10 min-h-0! pointer-events-none">
             <AppSidebar className="pointer-events-auto" />
-            <SidebarTrigger className="pointer-events-auto fixed top-4 left-4 z-20" />
           </SidebarProvider>
         </ThemeProvider>
       </body>
