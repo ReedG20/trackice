@@ -194,6 +194,19 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
     async (suggestion: Suggestion) => {
       if (!searchBoxRef.current || !sessionTokenRef.current) return
 
+      // Immediately update UI for instant feedback
+      const fullAddress =
+        suggestion.full_address ||
+        suggestion.place_formatted ||
+        suggestion.name
+      setAddress(fullAddress)
+      setIsVerified(true)
+      setSuggestions([])
+      setShowSuggestions(false)
+      setHighlightedIndex(-1)
+      setIsSearching(false)
+
+      // Fetch coordinates in the background
       try {
         const response = await searchBoxRef.current.retrieve(
           { mapbox_id: suggestion.mapbox_id } as Parameters<
@@ -203,25 +216,17 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
         )
         const feature = response.features?.[0]
         if (feature) {
-          const fullAddress =
-            suggestion.full_address ||
-            suggestion.place_formatted ||
-            suggestion.name
-          setAddress(fullAddress)
           setCoordinates([
             feature.geometry.coordinates[0],
             feature.geometry.coordinates[1],
           ])
-          setIsVerified(true)
-          setSuggestions([])
-          setShowSuggestions(false)
-          setHighlightedIndex(-1)
-          setIsSearching(false)
-          // Create new session token for next search
-          sessionTokenRef.current = new SessionToken()
         }
+        // Create new session token for next search
+        sessionTokenRef.current = new SessionToken()
       } catch (error) {
         console.error("Retrieve failed:", error)
+        // Address is already shown, just log the error
+        // Coordinates will be null but form still works
       }
     },
     []
