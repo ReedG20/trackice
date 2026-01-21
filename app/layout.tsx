@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, DM_Sans } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/app-sidebar";
 import "./globals.css";
 
 const dmSans = DM_Sans({ subsets: ["latin"], variable: "--font-sans" });
@@ -36,7 +38,13 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          {children}
+          <SidebarProvider>
+            <AppSidebar />
+            <main className="flex-1">
+              <SidebarTrigger />
+              {children}
+            </main>
+          </SidebarProvider>
         </ThemeProvider>
       </body>
     </html>
