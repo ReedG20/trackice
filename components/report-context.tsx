@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useContext, useState, useCallback, type ReactNode } from "react"
+import { Id } from "@/convex/_generated/dataModel"
 
 interface Report {
   _id: string
@@ -11,6 +12,7 @@ interface Report {
   details?: string
   agentCount?: number
   vehicleCount?: number
+  images?: Id<"_storage">[]
   createdAt: number
 }
 

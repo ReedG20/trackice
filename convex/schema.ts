@@ -10,6 +10,7 @@ export default defineSchema({
     details: v.optional(v.string()),
     agentCount: v.optional(v.number()),
     vehicleCount: v.optional(v.number()),
+    images: v.optional(v.array(v.id("_storage"))),
     createdAt: v.number(),
   }),
 });

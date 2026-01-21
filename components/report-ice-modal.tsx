@@ -3,6 +3,7 @@
 import * as React from "react"
 import { useMutation } from "convex/react"
 import { api } from "@/convex/_generated/api"
+import { Id } from "@/convex/_generated/dataModel"
 import { SearchBoxCore, SessionToken } from "@mapbox/search-js-core"
 import {
   Dialog,
@@ -38,6 +39,8 @@ import {
   Navigation03Icon,
   Cancel01Icon,
   Loading03Icon,
+  Image01Icon,
+  Add01Icon,
 } from "@hugeicons/core-free-icons"
 
 const MAPBOX_ACCESS_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || ""
@@ -51,6 +54,11 @@ interface Suggestion {
 
 interface ReportIceModalProps {
   children: React.ReactElement
+}
+
+interface SelectedImage {
+  file: File
+  preview: string
 }
 
 export function ReportIceModal({ children }: ReportIceModalProps) {
@@ -70,8 +78,12 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
   const [isLocating, setIsLocating] = React.useState(false)
   const [isSearching, setIsSearching] = React.useState(false)
   const [isSubmitting, setIsSubmitting] = React.useState(false)
+  const [selectedImages, setSelectedImages] = React.useState<SelectedImage[]>([])
 
   const createReport = useMutation(api.reports.createReport)
+  const generateUploadUrl = useMutation(api.reports.generateUploadUrl)
+  
+  const fileInputRef = React.useRef<HTMLInputElement>(null)
 
   const inputRef = React.useRef<HTMLInputElement>(null)
   const suggestionsRef = React.useRef<HTMLDivElement>(null)
@@ -330,6 +342,71 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
     )
   }
 
+  // Handle image selection
+  const handleImageSelect = React.useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files
+    if (!files) return
+
+    const remainingSlots = 3 - selectedImages.length
+    const filesToAdd = Array.from(files).slice(0, remainingSlots)
+
+    const newImages = filesToAdd.map(file => ({
+      file,
+      preview: URL.createObjectURL(file)
+    }))
+
+    setSelectedImages(prev => [...prev, ...newImages])
+    
+    // Reset file input
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""
+    }
+  }, [selectedImages.length])
+
+  // Remove a selected image
+  const handleRemoveImage = React.useCallback((index: number) => {
+    setSelectedImages(prev => {
+      const newImages = [...prev]
+      // Revoke object URL to prevent memory leaks
+      URL.revokeObjectURL(newImages[index].preview)
+      newImages.splice(index, 1)
+      return newImages
+    })
+  }, [])
+
+  // Cleanup object URLs when modal closes
+  React.useEffect(() => {
+    if (!open) {
+      selectedImages.forEach(img => URL.revokeObjectURL(img.preview))
+    }
+  }, [open, selectedImages])
+
+  // Upload images to Convex storage
+  const uploadImages = async (): Promise<Id<"_storage">[]> => {
+    const storageIds: Id<"_storage">[] = []
+    
+    for (const { file } of selectedImages) {
+      // Get upload URL
+      const uploadUrl = await generateUploadUrl()
+      
+      // Upload the file
+      const result = await fetch(uploadUrl, {
+        method: "POST",
+        headers: { "Content-Type": file.type },
+        body: file,
+      })
+      
+      if (!result.ok) {
+        throw new Error("Failed to upload image")
+      }
+      
+      const { storageId } = await result.json()
+      storageIds.push(storageId)
+    }
+    
+    return storageIds
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
@@ -338,9 +415,17 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
       return
     }
 
+    if (selectedImages.length < 1) {
+      alert("Please add at least one image")
+      return
+    }
+
     setIsSubmitting(true)
     
     try {
+      // Upload images first
+      const imageIds = await uploadImages()
+      
       await createReport({
         address,
         longitude: coordinates[0],
@@ -349,6 +434,7 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
         details: details || undefined,
         agentCount: agentCount ? parseInt(agentCount, 10) : undefined,
         vehicleCount: vehicleCount ? parseInt(vehicleCount, 10) : undefined,
+        images: imageIds,
       })
       
       setOpen(false)
@@ -362,6 +448,7 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
       setDetails("")
       setAgentCount("")
       setVehicleCount("")
+      setSelectedImages([])
     } catch (error) {
       console.error("Failed to submit report:", error)
       alert("Failed to submit report. Please try again.")
@@ -506,6 +593,78 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
               </FieldDescription>
             </Field>
 
+            {/* Image Upload */}
+            <Field>
+              <FieldLabel>
+                <HugeiconsIcon
+                  icon={Image01Icon}
+                  strokeWidth={2}
+                  className="size-4"
+                />
+                Photos
+              </FieldLabel>
+              <div className="space-y-3">
+                {/* Image previews */}
+                {selectedImages.length > 0 && (
+                  <div className="flex gap-2 flex-wrap">
+                    {selectedImages.map((img, index) => (
+                      <div
+                        key={index}
+                        className="relative size-20 rounded-md overflow-hidden border bg-muted"
+                      >
+                        <img
+                          src={img.preview}
+                          alt={`Selected ${index + 1}`}
+                          className="size-full object-cover"
+                        />
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveImage(index)}
+                          className="absolute top-1 right-1 size-5 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors"
+                        >
+                          <HugeiconsIcon
+                            icon={Cancel01Icon}
+                            strokeWidth={2}
+                            className="size-3 text-white"
+                          />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Add image button */}
+                {selectedImages.length < 3 && (
+                  <button
+                    type="button"
+                    onClick={() => fileInputRef.current?.click()}
+                    className="flex items-center justify-center gap-2 w-full h-20 border-2 border-dashed rounded-md text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
+                  >
+                    <HugeiconsIcon
+                      icon={Add01Icon}
+                      strokeWidth={2}
+                      className="size-5"
+                    />
+                    <span className="text-sm">
+                      Add photo {selectedImages.length > 0 && `(${selectedImages.length}/3)`}
+                    </span>
+                  </button>
+                )}
+                
+                <input
+                  ref={fileInputRef}
+                  type="file"
+                  accept="image/*"
+                  multiple
+                  onChange={handleImageSelect}
+                  className="hidden"
+                />
+              </div>
+              <FieldDescription>
+                At least one photo is required (up to 3).
+              </FieldDescription>
+            </Field>
+
             {/* Details */}
             <Field>
               <FieldLabel htmlFor="details">
@@ -585,7 +744,7 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={isSubmitting || !coordinates}>
+            <Button type="submit" disabled={isSubmitting || !coordinates || selectedImages.length < 1}>
               {isSubmitting ? "Submitting..." : "Submit Report"}
             </Button>
           </DialogFooter>

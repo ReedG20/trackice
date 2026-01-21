@@ -2,6 +2,7 @@
 
 import { useQuery } from "convex/react"
 import { api } from "@/convex/_generated/api"
+import { Id } from "@/convex/_generated/dataModel"
 import { useReport } from "@/components/report-context"
 import { cn } from "@/lib/utils"
 import {
@@ -37,6 +38,7 @@ interface Report {
   details?: string
   agentCount?: number
   vehicleCount?: number
+  images?: Id<"_storage">[]
   createdAt: number
 }
 
@@ -53,6 +55,22 @@ function formatTimeAgo(timestamp: number): string {
   if (hours < 24) return `${hours} hr${hours > 1 ? "s" : ""} ago`
   if (days === 1) return "1 day ago"
   return `${days} days ago`
+}
+
+function ReportImage({ storageId }: { storageId: Id<"_storage"> }) {
+  const imageUrl = useQuery(api.reports.getImageUrl, { storageId })
+  
+  if (!imageUrl) {
+    return <Skeleton className="size-14 rounded-md shrink-0" />
+  }
+  
+  return (
+    <img 
+      src={imageUrl} 
+      alt="Report" 
+      className="size-14 rounded-md shrink-0 object-cover"
+    />
+  )
 }
 
 function ReportingCard({
@@ -74,8 +92,12 @@ function ReportingCard({
       )}
       onClick={onClick}
     >
-      {/* Placeholder image */}
-      <Skeleton className="size-14 rounded-md shrink-0" />
+      {/* Report image */}
+      {report.images && report.images.length > 0 ? (
+        <ReportImage storageId={report.images[0]} />
+      ) : (
+        <Skeleton className="size-14 rounded-md shrink-0" />
+      )}
       
       {/* Content */}
       <div className="flex flex-col gap-1 min-w-0 flex-1">
