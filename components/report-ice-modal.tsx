@@ -35,6 +35,7 @@ import {
   TextIcon,
   Navigation03Icon,
   Cancel01Icon,
+  Loading03Icon,
 } from "@hugeicons/core-free-icons"
 
 const MAPBOX_ACCESS_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || ""
@@ -65,6 +66,7 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
   const [agentCount, setAgentCount] = React.useState("")
   const [vehicleCount, setVehicleCount] = React.useState("")
   const [isLocating, setIsLocating] = React.useState(false)
+  const [isSearching, setIsSearching] = React.useState(false)
 
   const inputRef = React.useRef<HTMLInputElement>(null)
   const suggestionsRef = React.useRef<HTMLDivElement>(null)
@@ -72,6 +74,9 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
   // Initialize SearchBoxCore and session token
   const searchBoxRef = React.useRef<SearchBoxCore | null>(null)
   const sessionTokenRef = React.useRef<SessionToken | null>(null)
+  
+  // Track request version to prevent race conditions
+  const requestVersionRef = React.useRef(0)
 
   React.useEffect(() => {
     if (MAPBOX_ACCESS_TOKEN) {
@@ -127,20 +132,36 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
       }
 
       // Don't search for very short inputs
-      if (value.length < 3) {
+      if (value.length < 2) {
         setSuggestions([])
         setShowSuggestions(false)
+        setIsSearching(false)
         return
       }
 
+      // Show loading state
+      setIsSearching(true)
+
       // Debounce the search
       debounceRef.current = setTimeout(async () => {
-        if (!searchBoxRef.current || !sessionTokenRef.current) return
+        if (!searchBoxRef.current || !sessionTokenRef.current) {
+          setIsSearching(false)
+          return
+        }
+
+        // Increment version for this request
+        const currentVersion = ++requestVersionRef.current
 
         try {
           const response = await searchBoxRef.current.suggest(value, {
             sessionToken: sessionTokenRef.current,
           })
+
+          // Ignore stale responses
+          if (currentVersion !== requestVersionRef.current) {
+            return
+          }
+
           const newSuggestions = (response.suggestions || []).map((s) => ({
             mapbox_id: s.mapbox_id,
             name: s.name,
@@ -150,11 +171,58 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
           setSuggestions(newSuggestions)
           setShowSuggestions(newSuggestions.length > 0)
         } catch (error) {
+          // Ignore errors from stale requests
+          if (currentVersion !== requestVersionRef.current) {
+            return
+          }
           console.error("Search failed:", error)
           setSuggestions([])
           setShowSuggestions(false)
+        } finally {
+          // Only clear loading if this is still the current request
+          if (currentVersion === requestVersionRef.current) {
+            setIsSearching(false)
+          }
         }
-      }, 300)
+      }, 200)
+    },
+    []
+  )
+
+  // Handle selection from suggestions
+  const handleSelectSuggestion = React.useCallback(
+    async (suggestion: Suggestion) => {
+      if (!searchBoxRef.current || !sessionTokenRef.current) return
+
+      try {
+        const response = await searchBoxRef.current.retrieve(
+          { mapbox_id: suggestion.mapbox_id } as Parameters<
+            SearchBoxCore["retrieve"]
+          >[0],
+          { sessionToken: sessionTokenRef.current }
+        )
+        const feature = response.features?.[0]
+        if (feature) {
+          const fullAddress =
+            suggestion.full_address ||
+            suggestion.place_formatted ||
+            suggestion.name
+          setAddress(fullAddress)
+          setCoordinates([
+            feature.geometry.coordinates[0],
+            feature.geometry.coordinates[1],
+          ])
+          setIsVerified(true)
+          setSuggestions([])
+          setShowSuggestions(false)
+          setHighlightedIndex(-1)
+          setIsSearching(false)
+          // Create new session token for next search
+          sessionTokenRef.current = new SessionToken()
+        }
+      } catch (error) {
+        console.error("Retrieve failed:", error)
+      }
     },
     []
   )
@@ -189,44 +257,7 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
           break
       }
     },
-    [showSuggestions, suggestions, highlightedIndex]
-  )
-
-  // Handle selection from suggestions
-  const handleSelectSuggestion = React.useCallback(
-    async (suggestion: Suggestion) => {
-      if (!searchBoxRef.current || !sessionTokenRef.current) return
-
-      try {
-        const response = await searchBoxRef.current.retrieve(
-          { mapbox_id: suggestion.mapbox_id } as Parameters<
-            SearchBoxCore["retrieve"]
-          >[0],
-          { sessionToken: sessionTokenRef.current }
-        )
-        const feature = response.features?.[0]
-        if (feature) {
-          const fullAddress =
-            suggestion.full_address ||
-            suggestion.place_formatted ||
-            suggestion.name
-          setAddress(fullAddress)
-          setCoordinates([
-            feature.geometry.coordinates[0],
-            feature.geometry.coordinates[1],
-          ])
-          setIsVerified(true)
-          setSuggestions([])
-          setShowSuggestions(false)
-          setHighlightedIndex(-1)
-          // Create new session token for next search
-          sessionTokenRef.current = new SessionToken()
-        }
-      } catch (error) {
-        console.error("Retrieve failed:", error)
-      }
-    },
-    []
+    [showSuggestions, suggestions, highlightedIndex, handleSelectSuggestion]
   )
 
   // Clear selected address
@@ -236,6 +267,9 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
     setIsVerified(false)
     setSuggestions([])
     setShowSuggestions(false)
+    setIsSearching(false)
+    // Cancel any pending requests
+    requestVersionRef.current++
     // Focus the input after clearing
     setTimeout(() => inputRef.current?.focus(), 0)
   }, [])
@@ -305,6 +339,7 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
     setIsVerified(false)
     setSuggestions([])
     setShowSuggestions(false)
+    setIsSearching(false)
     setDetails("")
     setAgentCount("")
     setVehicleCount("")
@@ -366,6 +401,12 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
                           className="size-4"
                         />
                       </InputGroupButton>
+                    ) : isSearching ? (
+                      <HugeiconsIcon
+                        icon={Loading03Icon}
+                        strokeWidth={2}
+                        className="size-4 animate-spin text-muted-foreground"
+                      />
                     ) : (
                       <InputGroupButton
                         variant="ghost"
