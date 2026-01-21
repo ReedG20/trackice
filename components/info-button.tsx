@@ -36,21 +36,11 @@ export function InfoButton() {
         <AlertDialogHeader>
           <AlertDialogTitle>hey!</AlertDialogTitle>
           <AlertDialogDescription className="text-left space-y-4">
-            <p>
-              like you, i would prefer our democracy doesn&apos;t turn into a fascist
-              regime within the next 3 years.
-            </p>
-            <p>
-              ...so i built a tool that tracks ice sightings from across the
-              internet, and puts it all on one map.
-            </p>
-            <p>
-              if you&apos;d like to be alerted if ice enters <em>your</em> neighborhood,
-              you can subscribe to location-based SMS and/or email
-              notifications.
-            </p>
+            <p>like you, i would prefer our democracy doesn&apos;t turn into a fascist regime within the next 3 years.</p>
+            <p>...so i built a tool that tracks ICE sightings from across the internet, and puts it all on one map.</p>
+            <p>if you&apos;d like to be alerted if ICE enters <em>your</em> neighborhood, you can subscribe to location-based SMS and/or email notifications.</p>
             <p>stay safe!</p>
-            <p className="font-semibold">fuck ice.</p>
+            <p className="font-semibold">fuck ICE.</p>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
