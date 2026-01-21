@@ -206,24 +206,56 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
     []
   )
 
+  // Format a short address from structured components
+  const formatShortAddress = (feature: {
+    properties?: {
+      name?: string
+      context?: {
+        address?: { name?: string }
+        street?: { name?: string }
+        place?: { name?: string }
+        locality?: { name?: string }
+      }
+    }
+  }): string | null => {
+    const props = feature.properties
+    if (!props) return null
+
+    const context = props.context || {}
+    
+    // Build street address: house number + street name
+    const houseNumber = context.address?.name || ""
+    const streetName = context.street?.name || ""
+    const streetAddress = [houseNumber, streetName].filter(Boolean).join(" ")
+    
+    // Get city (place) or locality as fallback
+    const city = context.place?.name || context.locality?.name || ""
+    
+    if (streetAddress && city) {
+      return `${streetAddress}, ${city}`
+    } else if (streetAddress) {
+      return streetAddress
+    } else if (props.name && city) {
+      return `${props.name}, ${city}`
+    }
+    
+    return null
+  }
+
   // Handle selection from suggestions
   const handleSelectSuggestion = React.useCallback(
     async (suggestion: Suggestion) => {
       if (!searchBoxRef.current || !sessionTokenRef.current) return
 
-      // Immediately update UI for instant feedback
-      const fullAddress =
-        suggestion.full_address ||
-        suggestion.place_formatted ||
-        suggestion.name
-      setAddress(fullAddress)
+      // Immediately update UI for instant feedback with suggestion name
+      setAddress(suggestion.name)
       setIsVerified(true)
       setSuggestions([])
       setShowSuggestions(false)
       setHighlightedIndex(-1)
       setIsSearching(false)
 
-      // Fetch coordinates in the background
+      // Fetch coordinates and build short address from structured data
       try {
         const response = await searchBoxRef.current.retrieve(
           { mapbox_id: suggestion.mapbox_id } as Parameters<
@@ -237,6 +269,16 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
             feature.geometry.coordinates[0],
             feature.geometry.coordinates[1],
           ])
+          
+          // Build short address from structured components
+          const shortAddress = formatShortAddress(feature)
+          if (shortAddress) {
+            setAddress(shortAddress)
+          } else {
+            // Fallback to place_formatted or full_address without country/state
+            const fallbackAddress = suggestion.place_formatted || suggestion.full_address || suggestion.name
+            setAddress(fallbackAddress)
+          }
         }
         // Create new session token for next search
         sessionTokenRef.current = new SessionToken()
@@ -317,11 +359,18 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
           const data = await response.json()
           if (data.features && data.features.length > 0) {
             const feature = data.features[0]
-            setAddress(
-              feature.properties.full_address ||
-                feature.properties.place_name ||
-                `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
-            )
+            // Try to build short address from structured data
+            const shortAddress = formatShortAddress(feature)
+            if (shortAddress) {
+              setAddress(shortAddress)
+            } else {
+              // Fallback to full address
+              setAddress(
+                feature.properties.full_address ||
+                  feature.properties.place_name ||
+                  `${latitude.toFixed(6)}, ${longitude.toFixed(6)}`
+              )
+            }
             setIsVerified(true)
           } else {
             setAddress(`${latitude.toFixed(6)}, ${longitude.toFixed(6)}`)
