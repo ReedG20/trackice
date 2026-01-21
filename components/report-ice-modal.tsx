@@ -613,42 +613,38 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
                 />
                 Photos
               </FieldLabel>
-              <div className="space-y-3">
+              <div className="flex gap-2 flex-wrap">
                 {/* Image previews */}
-                {selectedImages.length > 0 && (
-                  <div className="flex gap-2 flex-wrap">
-                    {selectedImages.map((img, index) => (
-                      <div
-                        key={index}
-                        className="relative size-20 rounded-md overflow-hidden border bg-muted"
-                      >
-                        <img
-                          src={img.preview}
-                          alt={`Selected ${index + 1}`}
-                          className="size-full object-cover"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => handleRemoveImage(index)}
-                          className="absolute top-1 right-1 size-5 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors"
-                        >
-                          <HugeiconsIcon
-                            icon={Cancel01Icon}
-                            strokeWidth={2}
-                            className="size-3 text-white"
-                          />
-                        </button>
-                      </div>
-                    ))}
+                {selectedImages.map((img, index) => (
+                  <div
+                    key={index}
+                    className="relative size-20 rounded-md overflow-hidden border bg-muted"
+                  >
+                    <img
+                      src={img.preview}
+                      alt={`Selected ${index + 1}`}
+                      className="size-full object-cover"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => handleRemoveImage(index)}
+                      className="absolute top-1 right-1 size-5 rounded-full bg-black/60 hover:bg-black/80 flex items-center justify-center transition-colors"
+                    >
+                      <HugeiconsIcon
+                        icon={Cancel01Icon}
+                        strokeWidth={2}
+                        className="size-3 text-white"
+                      />
+                    </button>
                   </div>
-                )}
+                ))}
                 
-                {/* Add image button */}
+                {/* Add image button - hidden when 3 images selected */}
                 {selectedImages.length < 3 && (
                   <button
                     type="button"
                     onClick={() => fileInputRef.current?.click()}
-                    className="flex items-center justify-center gap-2 w-full h-20 border-2 border-dashed rounded-md text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
+                    className="flex flex-1 items-center justify-center gap-2 h-20 min-w-20 border-2 border-dashed rounded-md text-muted-foreground hover:text-foreground hover:border-primary/50 transition-colors"
                   >
                     <HugeiconsIcon
                       icon={Add01Icon}
@@ -656,7 +652,7 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
                       className="size-5"
                     />
                     <span className="text-sm">
-                      Add photo {selectedImages.length > 0 && `(${selectedImages.length}/3)`}
+                      Add photo ({selectedImages.length}/3)
                     </span>
                   </button>
                 )}
