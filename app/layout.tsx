@@ -30,7 +30,7 @@ export default function RootLayout({
   return (
     <html lang="en" className={dmSans.variable} suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} antialiased relative`}
       >
         <ThemeProvider
           attribute="class"
@@ -38,12 +38,15 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <SidebarProvider>
-            <AppSidebar />
-            <main className="flex-1">
-              <SidebarTrigger />
-              {children}
-            </main>
+          {/* Map fills the entire background */}
+          <div className="fixed inset-0 z-0">
+            {children}
+          </div>
+          
+          {/* Sidebar overlays on top */}
+          <SidebarProvider className="sidebar-overlay fixed inset-0 z-10 min-h-0! pointer-events-none">
+            <AppSidebar className="pointer-events-auto" />
+            <SidebarTrigger className="pointer-events-auto fixed top-4 left-4 z-20" />
           </SidebarProvider>
         </ThemeProvider>
       </body>

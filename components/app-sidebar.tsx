@@ -5,9 +5,9 @@ import {
   SidebarHeader,
 } from "@/components/ui/sidebar"
 
-export function AppSidebar() {
+export function AppSidebar({ className }: { className?: string }) {
   return (
-    <Sidebar variant="floating">
+    <Sidebar variant="floating" className={className}>
       <SidebarHeader />
       <SidebarContent />
       <SidebarFooter />

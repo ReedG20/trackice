@@ -124,3 +124,8 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Make sidebar truly float over content without reserving space */
+.sidebar-overlay [data-slot="sidebar-gap"] {
+  width: 0 !important;
+}
