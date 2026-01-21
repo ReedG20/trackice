@@ -5,14 +5,21 @@ import { useTheme } from "next-themes";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Map, Marker, Popup, NavigationControl } from "react-map-gl/mapbox";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardDescription,
+  CardAction,
+} from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  Location01Icon,
   Calendar03Icon,
   UserMultiple02Icon,
   Car01Icon,
+  Cancel01Icon,
 } from "@hugeicons/core-free-icons";
 import "mapbox-gl/dist/mapbox-gl.css";
 
@@ -49,6 +56,8 @@ function ReportPopup({
   report: Report;
   onClose: () => void;
 }) {
+  const hasDetails = report.details || report.agentCount || report.vehicleCount;
+
   return (
     <Popup
       longitude={report.longitude}
@@ -59,57 +68,58 @@ function ReportPopup({
       offset={20}
       className="report-popup"
     >
-      <Card className="border-0 shadow-none min-w-[240px] max-w-[280px]">
-        <CardHeader className="p-3 pb-2">
-          <div className="flex items-start justify-between gap-2">
-            <CardTitle className="text-sm font-semibold leading-tight">
-              {report.address}
-            </CardTitle>
-            <button
-              onClick={onClose}
-              className="text-muted-foreground hover:text-foreground text-lg leading-none"
-            >
-              ×
-            </button>
-          </div>
-        </CardHeader>
-        <CardContent className="p-3 pt-0 space-y-2">
-          <div className="flex items-center gap-1.5 text-xs text-muted-foreground">
+      <Card size="sm" className="w-[280px] shadow-md">
+        <CardHeader>
+          <CardTitle>{report.address}</CardTitle>
+          <CardDescription className="flex items-center gap-1.5">
             <HugeiconsIcon
               icon={Calendar03Icon}
               strokeWidth={2}
-              className="size-3.5"
+              className="size-3"
             />
             {new Date(report.dateTime).toLocaleString()}
-          </div>
+          </CardDescription>
+          <CardAction>
+            <Button variant="ghost" size="icon-xs" onClick={onClose}>
+              <HugeiconsIcon icon={Cancel01Icon} strokeWidth={2} className="size-4" />
+            </Button>
+          </CardAction>
+        </CardHeader>
 
-          {report.details && (
-            <p className="text-xs text-foreground">{report.details}</p>
-          )}
+        {hasDetails && (
+          <CardContent className="border-t border-border pt-4 space-y-3">
+            {report.details && (
+              <p className="text-sm text-muted-foreground">
+                {report.details}
+              </p>
+            )}
 
-          <div className="flex gap-3">
-            {report.agentCount && (
-              <Badge variant="secondary" className="text-xs gap-1">
-                <HugeiconsIcon
-                  icon={UserMultiple02Icon}
-                  strokeWidth={2}
-                  className="size-3"
-                />
-                ~{report.agentCount} agents
-              </Badge>
+            {(report.agentCount || report.vehicleCount) && (
+              <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                {report.agentCount && (
+                  <div className="flex items-center gap-1.5">
+                    <HugeiconsIcon
+                      icon={UserMultiple02Icon}
+                      strokeWidth={2}
+                      className="size-4"
+                    />
+                    <span>~{report.agentCount} agents</span>
+                  </div>
+                )}
+                {report.vehicleCount && (
+                  <div className="flex items-center gap-1.5">
+                    <HugeiconsIcon
+                      icon={Car01Icon}
+                      strokeWidth={2}
+                      className="size-4"
+                    />
+                    <span>~{report.vehicleCount} vehicles</span>
+                  </div>
+                )}
+              </div>
             )}
-            {report.vehicleCount && (
-              <Badge variant="secondary" className="text-xs gap-1">
-                <HugeiconsIcon
-                  icon={Car01Icon}
-                  strokeWidth={2}
-                  className="size-3"
-                />
-                ~{report.vehicleCount} vehicles
-              </Badge>
-            )}
-          </div>
-        </CardContent>
+          </CardContent>
+        )}
       </Card>
     </Popup>
   );
