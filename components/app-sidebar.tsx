@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
+import { AlertsModal } from "@/components/alerts-modal"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { Search01Icon, Location01Icon, Calendar03Icon, Mail01Icon, Alert02Icon, Target01Icon } from "@hugeicons/core-free-icons"
 
@@ -206,9 +207,11 @@ export function AppSidebar({ className }: { className?: string }) {
               </p>
             </div>
           </div>
-          <Button size="sm" className="w-full">
-            Get Alerts
-          </Button>
+          <AlertsModal>
+            <Button size="sm" className="w-full">
+              Get Alerts
+            </Button>
+          </AlertsModal>
         </div>
       </SidebarFooter>
     </Sidebar>

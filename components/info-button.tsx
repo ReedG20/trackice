@@ -12,13 +12,31 @@ import {
   AlertDialogTitle,
   AlertDialogCancel,
 } from "@/components/ui/alert-dialog";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+
+const STORAGE_KEY = "trackice-info-seen";
 
 export function InfoButton() {
   const [open, setOpen] = useState(false);
 
+  useEffect(() => {
+    // Check if user has seen the info modal before
+    const hasSeenInfo = localStorage.getItem(STORAGE_KEY);
+    if (!hasSeenInfo) {
+      setOpen(true);
+    }
+  }, []);
+
+  const handleOpenChange = (isOpen: boolean) => {
+    setOpen(isOpen);
+    // Mark as seen when modal is closed
+    if (!isOpen) {
+      localStorage.setItem(STORAGE_KEY, "true");
+    }
+  };
+
   return (
-    <AlertDialog open={open} onOpenChange={setOpen}>
+    <AlertDialog open={open} onOpenChange={handleOpenChange}>
       <Button
         variant="outline"
         size="icon"
