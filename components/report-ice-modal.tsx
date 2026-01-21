@@ -374,12 +374,33 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
     })
   }, [])
 
-  // Cleanup object URLs when modal closes
-  React.useEffect(() => {
-    if (!open) {
-      selectedImages.forEach(img => URL.revokeObjectURL(img.preview))
+  // Reset form state
+  const resetForm = React.useCallback(() => {
+    setAddress("")
+    setCoordinates(null)
+    setIsVerified(false)
+    setSuggestions([])
+    setShowSuggestions(false)
+    setHighlightedIndex(-1)
+    setDateTime("")
+    setDetails("")
+    setAgentCount("")
+    setVehicleCount("")
+    setIsSearching(false)
+    // Cancel any pending requests
+    requestVersionRef.current++
+    // Cleanup image previews
+    selectedImages.forEach(img => URL.revokeObjectURL(img.preview))
+    setSelectedImages([])
+  }, [selectedImages])
+
+  // Handle modal open/close state changes
+  const handleOpenChange = React.useCallback((newOpen: boolean) => {
+    setOpen(newOpen)
+    if (!newOpen) {
+      resetForm()
     }
-  }, [open, selectedImages])
+  }, [resetForm])
 
   // Upload images to Convex storage
   const uploadImages = async (): Promise<Id<"_storage">[]> => {
@@ -437,18 +458,7 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
         images: imageIds,
       })
       
-      setOpen(false)
-      // Reset form
-      setAddress("")
-      setCoordinates(null)
-      setIsVerified(false)
-      setSuggestions([])
-      setShowSuggestions(false)
-      setIsSearching(false)
-      setDetails("")
-      setAgentCount("")
-      setVehicleCount("")
-      setSelectedImages([])
+      handleOpenChange(false)
     } catch (error) {
       console.error("Failed to submit report:", error)
       alert("Failed to submit report. Please try again.")
@@ -458,7 +468,7 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
   }
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger render={children} />
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
@@ -739,7 +749,7 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setOpen(false)}
+              onClick={() => handleOpenChange(false)}
               disabled={isSubmitting}
             >
               Cancel
