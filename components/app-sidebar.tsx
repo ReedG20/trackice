@@ -105,7 +105,7 @@ function ReportingCard({
 export function AppSidebar({ className }: { className?: string }) {
   return (
     <Sidebar variant="floating" className={className}>
-      <SidebarHeader className="gap-3">
+      <SidebarHeader>
         {/* Logo */}
         <div className="flex items-center gap-2 px-2 pt-1">
           <div className="size-8 rounded-md bg-primary flex items-center justify-center">
@@ -113,11 +113,13 @@ export function AppSidebar({ className }: { className?: string }) {
           </div>
           <span className="font-semibold text-lg tracking-tight">TrackIce</span>
         </div>
-        
-        <SidebarSeparator />
-        
+      </SidebarHeader>
+      
+      <SidebarSeparator className="mx-0" />
+      
+      <SidebarContent>
         {/* Search and Filters */}
-        <SidebarGroup className="p-0">
+        <SidebarGroup>
           <SidebarGroupContent className="space-y-2">
             {/* Search bar */}
             <div className="relative">
@@ -164,21 +166,17 @@ export function AppSidebar({ className }: { className?: string }) {
             </div>
           </SidebarGroupContent>
         </SidebarGroup>
-      </SidebarHeader>
-      
-      <SidebarSeparator />
-      
-      <SidebarContent>
-        {/* Recent Reportings Label */}
-        <div className="px-4 py-2">
-          <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
-            Recent Reportings
-          </span>
-        </div>
         
-        {/* Reportings List */}
-        <SidebarGroup className="p-0 px-2">
-          <SidebarGroupContent className="space-y-1">
+        <SidebarSeparator className="mx-0" />
+        
+        {/* Recent Reportings */}
+        <SidebarGroup>
+          <div className="px-2 py-2">
+            <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Recent Reportings
+            </span>
+          </div>
+          <SidebarGroupContent className="space-y-1 px-0">
             {mockReportings.map((reporting) => (
               <ReportingCard key={reporting.id} {...reporting} />
             ))}
