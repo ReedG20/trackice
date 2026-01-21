@@ -121,7 +121,7 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
                 <Input
                   id="address"
                   type="text"
-                  placeholder="Enter address or intersection"
+                  placeholder="Enter address"
                   value={address}
                   onChange={(e) => setAddress(e.target.value)}
                   className="flex-1"
@@ -143,8 +143,7 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
                 </Button>
               </div>
               <FieldDescription>
-                Street address, intersection, or landmark where activity was
-                observed.
+                Street address where activity was observed.
               </FieldDescription>
             </Field>
 
