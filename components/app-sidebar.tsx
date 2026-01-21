@@ -19,8 +19,9 @@ import {
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { AlertsModal } from "@/components/alerts-modal"
+import { ReportIceModal } from "@/components/report-ice-modal"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { Search01Icon, Location01Icon, Calendar03Icon, Mail01Icon, Alert02Icon, Target01Icon } from "@hugeicons/core-free-icons"
+import { Search01Icon, Location01Icon, Calendar03Icon, Mail01Icon, Alert02Icon, Target01Icon, SmartPhone01Icon } from "@hugeicons/core-free-icons"
 
 // Placeholder reporting data
 const mockReportings = [
@@ -122,10 +123,12 @@ export function AppSidebar({ className }: { className?: string }) {
         {/* Report Button, Search and Filters */}
         <SidebarGroup>
           <SidebarGroupContent className="space-y-2">
-            <Button className="w-full" size="sm">
-              <HugeiconsIcon icon={Alert02Icon} strokeWidth={2} className="size-4" />
-              Report ICE
-            </Button>
+            <ReportIceModal>
+              <Button className="w-full" size="sm">
+                <HugeiconsIcon icon={Alert02Icon} strokeWidth={2} className="size-4" />
+                Report ICE
+              </Button>
+            </ReportIceModal>
             {/* Search bar */}
             <div className="relative">
               <HugeiconsIcon 
@@ -194,21 +197,15 @@ export function AppSidebar({ className }: { className?: string }) {
         
         {/* Subscribe CTA */}
         <div className="p-3 bg-muted/50 rounded-md space-y-2.5">
-          <div className="flex items-start gap-2">
-            <HugeiconsIcon 
-              icon={Mail01Icon} 
-              strokeWidth={2} 
-              className="size-4 text-primary mt-0.5 shrink-0" 
-            />
-            <div className="space-y-0.5">
-              <p className="text-sm font-medium leading-tight">Stay safe!</p>
-              <p className="text-xs text-muted-foreground leading-snug">
-                Subscribe to SMS or email alerts for your area.
-              </p>
-            </div>
+          <div className="space-y-0.5">
+            <p className="text-sm font-medium leading-tight">Stay safe!</p>
+            <p className="text-xs text-muted-foreground leading-snug">
+              Subscribe to SMS or email alerts for your area.
+            </p>
           </div>
           <AlertsModal>
             <Button size="sm" className="w-full">
+              <HugeiconsIcon icon={SmartPhone01Icon} strokeWidth={2} className="size-4" />
               Get Alerts
             </Button>
           </AlertsModal>
