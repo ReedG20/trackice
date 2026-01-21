@@ -236,16 +236,16 @@ function ReportPopup({
           {/* Image Carousel */}
           {hasImages && (
             <div className="px-4 pb-3">
-              {report.images.length === 1 ? (
+              {report.images!.length === 1 ? (
                 <ReportImage
-                  storageId={report.images[0]}
+                  storageId={report.images![0]}
                   onClick={() => openLightbox(0)}
                   className="w-full h-32 rounded-md object-cover"
                 />
               ) : (
                 <Carousel className="w-full" opts={{ loop: true }}>
                   <CarouselContent className="-ml-2">
-                    {report.images.map((storageId, index) => (
+                    {report.images!.map((storageId, index) => (
                       <CarouselItem key={storageId} className="pl-2 basis-4/5">
                         <ReportImage
                           storageId={storageId}
@@ -302,7 +302,7 @@ function ReportPopup({
       {/* Image Lightbox */}
       {hasImages && (
         <ImageLightbox
-          images={report.images}
+          images={report.images!}
           initialIndex={lightboxIndex}
           open={lightboxOpen}
           onClose={() => setLightboxOpen(false)}
