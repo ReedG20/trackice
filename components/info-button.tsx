@@ -55,7 +55,7 @@ export function InfoButton() {
           <AlertDialogTitle>hey!</AlertDialogTitle>
           <AlertDialogDescription className="text-left space-y-4">
             <span className="block">like you, i would prefer our democracy doesn&apos;t turn into a fascist regime within the next 3 years.</span>
-            <span className="block">...so i built a tool that tracks ICE sightings from across the internet, and puts it all on one map.</span>
+            <span className="block">...so i built a tool that tracks ICE sightings from across the internet, and puts them all on one map.</span>
             <span className="block">if you&apos;d like to be alerted if ICE enters <em>your</em> neighborhood, you can subscribe to location-based SMS and/or email notifications.</span>
             <span className="block">stay safe!</span>
             <span className="block font-semibold">fuck ICE.</span>
