@@ -118,19 +118,13 @@ export function AppSidebar({ className }: { className?: string }) {
       <SidebarSeparator className="mx-0" />
       
       <SidebarContent>
-        {/* Report Button */}
+        {/* Report Button, Search and Filters */}
         <SidebarGroup>
-          <SidebarGroupContent>
+          <SidebarGroupContent className="space-y-2">
             <Button className="w-full" size="sm">
               <HugeiconsIcon icon={Alert02Icon} strokeWidth={2} className="size-4" />
               Report ICE
             </Button>
-          </SidebarGroupContent>
-        </SidebarGroup>
-        
-        {/* Search and Filters */}
-        <SidebarGroup>
-          <SidebarGroupContent className="space-y-2">
             {/* Search bar */}
             <div className="relative">
               <HugeiconsIcon 
@@ -180,8 +174,8 @@ export function AppSidebar({ className }: { className?: string }) {
         <SidebarSeparator className="mx-0" />
         
         {/* Recent Reportings */}
-        <SidebarGroup>
-          <div className="px-2 py-2">
+        <SidebarGroup className="pt-0">
+          <div className="px-2 pb-2">
             <span className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
               Recent Reportings
             </span>
