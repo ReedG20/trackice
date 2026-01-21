@@ -30,17 +30,17 @@ export function InfoButton() {
           strokeWidth={2}
           className="size-[1.2rem]"
         />
-        <span className="sr-only">About TrackIce</span>
+        <span className="sr-only">About TrackICE</span>
       </Button>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>hey!</AlertDialogTitle>
           <AlertDialogDescription className="text-left space-y-4">
-            <p>like you, i would prefer our democracy doesn&apos;t turn into a fascist regime within the next 3 years.</p>
-            <p>...so i built a tool that tracks ICE sightings from across the internet, and puts it all on one map.</p>
-            <p>if you&apos;d like to be alerted if ICE enters <em>your</em> neighborhood, you can subscribe to location-based SMS and/or email notifications.</p>
-            <p>stay safe!</p>
-            <p className="font-semibold">fuck ICE.</p>
+            <span className="block">like you, i would prefer our democracy doesn&apos;t turn into a fascist regime within the next 3 years.</span>
+            <span className="block">...so i built a tool that tracks ICE sightings from across the internet, and puts it all on one map.</span>
+            <span className="block">if you&apos;d like to be alerted if ICE enters <em>your</em> neighborhood, you can subscribe to location-based SMS and/or email notifications.</span>
+            <span className="block">stay safe!</span>
+            <span className="block font-semibold">fuck ICE.</span>
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>

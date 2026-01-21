@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "TrackIce",
+  title: "TrackICE",
   description: "Track ice conditions",
 };
 

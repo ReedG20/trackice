@@ -111,7 +111,7 @@ export function AppSidebar({ className }: { className?: string }) {
           <div className="size-8 rounded-md bg-primary flex items-center justify-center">
             <span className="text-primary-foreground font-bold text-sm">TI</span>
           </div>
-          <span className="font-semibold text-lg tracking-tight">TrackIce</span>
+          <span className="font-semibold text-lg tracking-tight">TrackICE</span>
         </div>
       </SidebarHeader>
       
