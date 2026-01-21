@@ -41,7 +41,7 @@ export function InfoButton() {
               regime within the next 3 years.
             </p>
             <p>
-              ...so i built a tool that tracks ice sightings from all across the
+              ...so i built a tool that tracks ice sightings from across the
               internet, and puts it all on one map.
             </p>
             <p>
