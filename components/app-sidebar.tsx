@@ -19,7 +19,7 @@ import {
 } from "@/components/ui/select"
 import { Skeleton } from "@/components/ui/skeleton"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { Search01Icon, Location01Icon, Calendar03Icon, Mail01Icon, Alert02Icon } from "@hugeicons/core-free-icons"
+import { Search01Icon, Location01Icon, Calendar03Icon, Mail01Icon, Alert02Icon, Target01Icon } from "@hugeicons/core-free-icons"
 
 // Placeholder reporting data
 const mockReportings = [
@@ -109,7 +109,7 @@ export function AppSidebar({ className }: { className?: string }) {
         {/* Logo */}
         <div className="flex items-center gap-2 px-2 pt-1">
           <div className="size-8 rounded-md bg-primary flex items-center justify-center">
-            <span className="text-primary-foreground font-bold text-sm">TI</span>
+            <HugeiconsIcon icon={Target01Icon} strokeWidth={2} className="size-5 text-primary-foreground" />
           </div>
           <span className="font-semibold text-lg tracking-tight">TrackICE</span>
         </div>
