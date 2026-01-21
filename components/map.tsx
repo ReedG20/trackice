@@ -31,17 +31,14 @@ interface Report {
   createdAt: number;
 }
 
-function ReportMarker({ onClick }: { onClick: () => void }) {
+function ReportMarker() {
   return (
-    <button
-      onClick={onClick}
-      className="relative flex items-center justify-center cursor-pointer transition-transform hover:scale-110 focus:outline-none"
-    >
+    <div className="relative flex items-center justify-center cursor-pointer transition-transform hover:scale-110">
       {/* Outer pulse animation */}
-      <span className="absolute size-8 rounded-full bg-red-500/30 animate-ping" />
+      <span className="absolute size-8 rounded-full bg-primary/30 animate-ping" />
       {/* Main marker */}
-      <span className="relative size-6 rounded-full bg-red-500 border-[3px] border-white shadow-lg" />
-    </button>
+      <span className="relative size-6 rounded-full bg-primary border-[3px] border-white shadow-lg" />
+    </div>
   );
 }
 
@@ -155,8 +152,12 @@ export function MapView() {
           longitude={report.longitude}
           latitude={report.latitude}
           anchor="center"
+          onClick={(e) => {
+            e.originalEvent.stopPropagation();
+            handleMarkerClick(report);
+          }}
         >
-          <ReportMarker onClick={() => handleMarkerClick(report)} />
+          <ReportMarker />
         </Marker>
       ))}
 
