@@ -44,7 +44,13 @@ export default function RootLayout({
           </div>
           
           {/* Sidebar overlays on top */}
-          <SidebarProvider className="sidebar-overlay fixed inset-0 z-10 min-h-0! pointer-events-none">
+          <SidebarProvider 
+            className="sidebar-overlay fixed inset-0 z-10 min-h-0! pointer-events-none"
+            style={{
+              "--sidebar-width": "18rem",
+              "--sidebar-width-mobile": "20rem",
+            } as React.CSSProperties}
+          >
             <AppSidebar className="pointer-events-auto" />
           </SidebarProvider>
         </ThemeProvider>
