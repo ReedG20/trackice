@@ -34,7 +34,7 @@ import {
   Car01Icon,
   TextIcon,
   Navigation03Icon,
-  Tick02Icon,
+  Cancel01Icon,
 } from "@hugeicons/core-free-icons"
 
 const MAPBOX_ACCESS_TOKEN = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN || ""
@@ -229,6 +229,17 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
     []
   )
 
+  // Clear selected address
+  const handleClearAddress = React.useCallback(() => {
+    setAddress("")
+    setCoordinates(null)
+    setIsVerified(false)
+    setSuggestions([])
+    setShowSuggestions(false)
+    // Focus the input after clearing
+    setTimeout(() => inputRef.current?.focus(), 0)
+  }, [])
+
   const handleUseCurrentLocation = () => {
     if (!navigator.geolocation) {
       alert("Geolocation is not supported by your browser")
@@ -324,13 +335,7 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
                 Location
               </FieldLabel>
               <div className="relative">
-                <InputGroup
-                  className={
-                    isVerified
-                      ? "border-green-500/50 focus-within:border-green-500 focus-within:ring-green-500/30"
-                      : ""
-                  }
-                >
+                <InputGroup data-disabled={isVerified || undefined}>
                   <InputGroupInput
                     ref={inputRef}
                     id="address"
@@ -340,37 +345,47 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
                     onChange={(e) => handleAddressChange(e.target.value)}
                     onKeyDown={handleKeyDown}
                     onFocus={() => {
-                      if (suggestions.length > 0) setShowSuggestions(true)
+                      if (suggestions.length > 0 && !isVerified)
+                        setShowSuggestions(true)
                     }}
                     autoComplete="off"
+                    disabled={isVerified}
                     required
                   />
                   <InputGroupAddon align="inline-end">
-                    {isVerified && (
-                      <HugeiconsIcon
-                        icon={Tick02Icon}
-                        strokeWidth={2}
-                        className="size-4 text-green-500"
-                      />
+                    {isVerified ? (
+                      <InputGroupButton
+                        variant="ghost"
+                        size="icon-xs"
+                        onClick={handleClearAddress}
+                        title="Clear address"
+                      >
+                        <HugeiconsIcon
+                          icon={Cancel01Icon}
+                          strokeWidth={2}
+                          className="size-4"
+                        />
+                      </InputGroupButton>
+                    ) : (
+                      <InputGroupButton
+                        variant="ghost"
+                        size="icon-xs"
+                        onClick={handleUseCurrentLocation}
+                        disabled={isLocating}
+                        title="Use current location"
+                      >
+                        <HugeiconsIcon
+                          icon={Navigation03Icon}
+                          strokeWidth={2}
+                          className={`size-4 ${isLocating ? "animate-pulse" : ""}`}
+                        />
+                      </InputGroupButton>
                     )}
-                    <InputGroupButton
-                      variant="ghost"
-                      size="icon-xs"
-                      onClick={handleUseCurrentLocation}
-                      disabled={isLocating}
-                      title="Use current location"
-                    >
-                      <HugeiconsIcon
-                        icon={Navigation03Icon}
-                        strokeWidth={2}
-                        className={`size-4 ${isLocating ? "animate-pulse" : ""}`}
-                      />
-                    </InputGroupButton>
                   </InputGroupAddon>
                 </InputGroup>
 
                 {/* Suggestions Dropdown */}
-                {showSuggestions && suggestions.length > 0 && (
+                {showSuggestions && suggestions.length > 0 && !isVerified && (
                   <div
                     ref={suggestionsRef}
                     className="absolute top-full left-0 right-0 z-50 mt-1.5 max-h-60 overflow-auto rounded-md border bg-popover p-1 shadow-md"
@@ -399,13 +414,7 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
                 )}
               </div>
               <FieldDescription>
-                {isVerified ? (
-                  <span className="text-green-600 dark:text-green-400">
-                    Location verified
-                  </span>
-                ) : (
-                  "Street address where activity was observed."
-                )}
+                Street address where activity was observed.
               </FieldDescription>
             </Field>
 
