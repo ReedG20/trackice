@@ -2,6 +2,8 @@
 
 import { useQuery } from "convex/react"
 import { api } from "@/convex/_generated/api"
+import { useReport } from "@/components/report-context"
+import { cn } from "@/lib/utils"
 import {
   Sidebar,
   SidebarContent,
@@ -26,6 +28,18 @@ import { ReportIceModal } from "@/components/report-ice-modal"
 import { HugeiconsIcon } from "@hugeicons/react"
 import { Search01Icon, Location01Icon, Calendar03Icon, Alert02Icon, Target01Icon, SmartPhone01Icon } from "@hugeicons/core-free-icons"
 
+interface Report {
+  _id: string
+  address: string
+  longitude: number
+  latitude: number
+  dateTime: string
+  details?: string
+  agentCount?: number
+  vehicleCount?: number
+  createdAt: number
+}
+
 function formatTimeAgo(timestamp: number): string {
   const now = Date.now()
   const diff = now - timestamp
@@ -42,14 +56,24 @@ function formatTimeAgo(timestamp: number): string {
 }
 
 function ReportingCard({
-  address,
-  createdAt,
+  report,
+  isActive,
+  onClick,
 }: {
-  address: string
-  createdAt: number
+  report: Report
+  isActive: boolean
+  onClick: () => void
 }) {
   return (
-    <div className="group flex gap-3 p-2 rounded-md hover:bg-sidebar-accent cursor-pointer transition-colors">
+    <div 
+      className={cn(
+        "group flex gap-3 p-2 rounded-md cursor-pointer transition-colors",
+        isActive 
+          ? "bg-primary/10 ring-1 ring-primary/30" 
+          : "hover:bg-sidebar-accent"
+      )}
+      onClick={onClick}
+    >
       {/* Placeholder image */}
       <Skeleton className="size-14 rounded-md shrink-0" />
       
@@ -57,11 +81,11 @@ function ReportingCard({
       <div className="flex flex-col gap-1 min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
           <span className="text-sm font-medium leading-tight truncate">
-            {address}
+            {report.address}
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">{formatTimeAgo(createdAt)}</span>
+          <span className="text-xs text-muted-foreground">{formatTimeAgo(report.createdAt)}</span>
         </div>
       </div>
     </div>
@@ -82,6 +106,7 @@ function ReportingCardSkeleton() {
 
 export function AppSidebar({ className }: { className?: string }) {
   const reports = useQuery(api.reports.getRecentReports, { limit: 20 })
+  const { selectedReport, setSelectedReport } = useReport()
 
   return (
     <Sidebar variant="floating" className={className}>
@@ -181,8 +206,9 @@ export function AppSidebar({ className }: { className?: string }) {
               reports.map((report) => (
                 <ReportingCard 
                   key={report._id} 
-                  address={report.address}
-                  createdAt={report.createdAt}
+                  report={report}
+                  isActive={selectedReport?._id === report._id}
+                  onClick={() => setSelectedReport(report)}
                 />
               ))
             )}

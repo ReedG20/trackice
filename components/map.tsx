@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useCallback } from "react";
+import { useEffect, useCallback } from "react";
 import { useTheme } from "next-themes";
 import { useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
-import { Map, Marker, Popup, NavigationControl } from "react-map-gl/mapbox";
+import { Map, Marker, Popup, NavigationControl, useMap } from "react-map-gl/mapbox";
+import { useReport } from "@/components/report-context";
 import {
   Card,
   CardContent,
@@ -125,35 +126,30 @@ function ReportPopup({
   );
 }
 
-export function MapView() {
-  const { resolvedTheme } = useTheme();
-  const [selectedReport, setSelectedReport] = useState<Report | null>(null);
+function MapContent() {
+  const { selectedReport, setSelectedReport, clearSelectedReport } = useReport();
+  const { current: map } = useMap();
 
   // Fetch recent reports - simpler than bounds-based for now
   const reports = useQuery(api.reports.getRecentReports, { limit: 100 });
 
   const handleMarkerClick = useCallback((report: Report) => {
     setSelectedReport(report);
-  }, []);
+  }, [setSelectedReport]);
 
-  const handlePopupClose = useCallback(() => {
-    setSelectedReport(null);
-  }, []);
-
-  const mapStyle = resolvedTheme === "dark" ? DARK_STYLE : LIGHT_STYLE;
+  // Fly to selected report when it changes (e.g., from sidebar click)
+  useEffect(() => {
+    if (selectedReport && map) {
+      map.flyTo({
+        center: [selectedReport.longitude, selectedReport.latitude],
+        zoom: 14,
+        duration: 1500,
+      });
+    }
+  }, [selectedReport, map]);
 
   return (
-    <Map
-      mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}
-      initialViewState={{
-        longitude: -122.4194,
-        latitude: 37.7749,
-        zoom: 10,
-      }}
-      style={{ width: "100%", height: "100%" }}
-      mapStyle={mapStyle}
-      reuseMaps
-    >
+    <>
       <NavigationControl position="top-right" />
 
       {reports?.map((report) => (
@@ -172,8 +168,30 @@ export function MapView() {
       ))}
 
       {selectedReport && (
-        <ReportPopup report={selectedReport} onClose={handlePopupClose} />
+        <ReportPopup report={selectedReport} onClose={clearSelectedReport} />
       )}
+    </>
+  );
+}
+
+export function MapView() {
+  const { resolvedTheme } = useTheme();
+  const mapStyle = resolvedTheme === "dark" ? DARK_STYLE : LIGHT_STYLE;
+
+  return (
+    <Map
+      id="main-map"
+      mapboxAccessToken={process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN}
+      initialViewState={{
+        longitude: -122.4194,
+        latitude: 37.7749,
+        zoom: 10,
+      }}
+      style={{ width: "100%", height: "100%" }}
+      mapStyle={mapStyle}
+      reuseMaps
+    >
+      <MapContent />
     </Map>
   );
 }
