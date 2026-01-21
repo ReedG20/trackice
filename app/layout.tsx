@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, DM_Sans } from "next/font/google";
 import { ThemeProvider } from "@/components/theme-provider";
+import { ConvexClientProvider } from "@/components/convex-provider";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import "./globals.css";
@@ -32,28 +33,30 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased relative`}
       >
-        <ThemeProvider
-          attribute="class"
-          defaultTheme="dark"
-          enableSystem
-          disableTransitionOnChange
-        >
-          {/* Map fills the entire background */}
-          <div className="fixed inset-0 z-0">
-            {children}
-          </div>
-          
-          {/* Sidebar overlays on top */}
-          <SidebarProvider 
-            className="sidebar-overlay fixed inset-0 z-10 min-h-0! pointer-events-none"
-            style={{
-              "--sidebar-width": "20rem",
-              "--sidebar-width-mobile": "22rem",
-            } as React.CSSProperties}
+        <ConvexClientProvider>
+          <ThemeProvider
+            attribute="class"
+            defaultTheme="dark"
+            enableSystem
+            disableTransitionOnChange
           >
-            <AppSidebar className="pointer-events-auto" />
-          </SidebarProvider>
-        </ThemeProvider>
+            {/* Map fills the entire background */}
+            <div className="fixed inset-0 z-0">
+              {children}
+            </div>
+            
+            {/* Sidebar overlays on top */}
+            <SidebarProvider 
+              className="sidebar-overlay fixed inset-0 z-10 min-h-0! pointer-events-none"
+              style={{
+                "--sidebar-width": "20rem",
+                "--sidebar-width-mobile": "22rem",
+              } as React.CSSProperties}
+            >
+              <AppSidebar className="pointer-events-auto" />
+            </SidebarProvider>
+          </ThemeProvider>
+        </ConvexClientProvider>
       </body>
     </html>
   );

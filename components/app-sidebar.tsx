@@ -1,3 +1,7 @@
+"use client"
+
+import { useQuery } from "convex/react"
+import { api } from "@/convex/_generated/api"
 import {
   Sidebar,
   SidebarContent,
@@ -9,7 +13,6 @@ import {
   SidebarInput,
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import {
   Select,
   SelectContent,
@@ -21,63 +24,29 @@ import { Skeleton } from "@/components/ui/skeleton"
 import { AlertsModal } from "@/components/alerts-modal"
 import { ReportIceModal } from "@/components/report-ice-modal"
 import { HugeiconsIcon } from "@hugeicons/react"
-import { Search01Icon, Location01Icon, Calendar03Icon, Mail01Icon, Alert02Icon, Target01Icon, SmartPhone01Icon } from "@hugeicons/core-free-icons"
+import { Search01Icon, Location01Icon, Calendar03Icon, Alert02Icon, Target01Icon, SmartPhone01Icon } from "@hugeicons/core-free-icons"
 
-// Placeholder reporting data
-const mockReportings = [
-  {
-    id: 1,
-    location: "Downtown Los Angeles, CA",
-    imageUrl: "/placeholder-1.jpg",
-    timeAgo: "12 min ago",
-    verified: true,
-  },
-  {
-    id: 2,
-    location: "Mission District, San Francisco",
-    imageUrl: "/placeholder-2.jpg",
-    timeAgo: "2 hrs ago",
-    verified: true,
-  },
-  {
-    id: 3,
-    location: "East Austin, TX",
-    imageUrl: "/placeholder-3.jpg",
-    timeAgo: "3 hrs ago",
-    verified: false,
-  },
-  {
-    id: 4,
-    location: "Jackson Heights, Queens, NY",
-    imageUrl: "/placeholder-4.jpg",
-    timeAgo: "5 hrs ago",
-    verified: true,
-  },
-  {
-    id: 5,
-    location: "Pilsen, Chicago, IL",
-    imageUrl: "/placeholder-5.jpg",
-    timeAgo: "8 hrs ago",
-    verified: false,
-  },
-  {
-    id: 6,
-    location: "Little Havana, Miami, FL",
-    imageUrl: "/placeholder-6.jpg",
-    timeAgo: "1 day ago",
-    verified: true,
-  },
-]
+function formatTimeAgo(timestamp: number): string {
+  const now = Date.now()
+  const diff = now - timestamp
+  
+  const minutes = Math.floor(diff / (1000 * 60))
+  const hours = Math.floor(diff / (1000 * 60 * 60))
+  const days = Math.floor(diff / (1000 * 60 * 60 * 24))
+  
+  if (minutes < 1) return "just now"
+  if (minutes < 60) return `${minutes} min ago`
+  if (hours < 24) return `${hours} hr${hours > 1 ? "s" : ""} ago`
+  if (days === 1) return "1 day ago"
+  return `${days} days ago`
+}
 
 function ReportingCard({
-  location,
-  timeAgo,
-  verified,
+  address,
+  createdAt,
 }: {
-  location: string
-  imageUrl: string
-  timeAgo: string
-  verified: boolean
+  address: string
+  createdAt: number
 }) {
   return (
     <div className="group flex gap-3 p-2 rounded-md hover:bg-sidebar-accent cursor-pointer transition-colors">
@@ -88,23 +57,32 @@ function ReportingCard({
       <div className="flex flex-col gap-1 min-w-0 flex-1">
         <div className="flex items-start justify-between gap-2">
           <span className="text-sm font-medium leading-tight truncate">
-            {location}
+            {address}
           </span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-xs text-muted-foreground">{timeAgo}</span>
-          {verified && (
-            <Badge variant="secondary" className="text-[10px] h-4 px-1.5">
-              Verified
-            </Badge>
-          )}
+          <span className="text-xs text-muted-foreground">{formatTimeAgo(createdAt)}</span>
         </div>
       </div>
     </div>
   )
 }
 
+function ReportingCardSkeleton() {
+  return (
+    <div className="flex gap-3 p-2">
+      <Skeleton className="size-14 rounded-md shrink-0" />
+      <div className="flex flex-col gap-2 flex-1">
+        <Skeleton className="h-4 w-3/4" />
+        <Skeleton className="h-3 w-1/2" />
+      </div>
+    </div>
+  )
+}
+
 export function AppSidebar({ className }: { className?: string }) {
+  const reports = useQuery(api.reports.getRecentReports, { limit: 20 })
+
   return (
     <Sidebar variant="floating" className={className}>
       <SidebarHeader>
@@ -185,9 +163,29 @@ export function AppSidebar({ className }: { className?: string }) {
             </span>
           </div>
           <SidebarGroupContent className="space-y-1 px-0">
-            {mockReportings.map((reporting) => (
-              <ReportingCard key={reporting.id} {...reporting} />
-            ))}
+            {reports === undefined ? (
+              // Loading state
+              <>
+                <ReportingCardSkeleton />
+                <ReportingCardSkeleton />
+                <ReportingCardSkeleton />
+              </>
+            ) : reports.length === 0 ? (
+              // Empty state
+              <div className="px-2 py-4 text-center">
+                <p className="text-sm text-muted-foreground">No reports yet</p>
+                <p className="text-xs text-muted-foreground mt-1">Be the first to report ICE activity</p>
+              </div>
+            ) : (
+              // Reports list
+              reports.map((report) => (
+                <ReportingCard 
+                  key={report._id} 
+                  address={report.address}
+                  createdAt={report.createdAt}
+                />
+              ))
+            )}
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>

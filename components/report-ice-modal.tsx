@@ -1,6 +1,8 @@
 "use client"
 
 import * as React from "react"
+import { useMutation } from "convex/react"
+import { api } from "@/convex/_generated/api"
 import { SearchBoxCore, SessionToken } from "@mapbox/search-js-core"
 import {
   Dialog,
@@ -67,6 +69,9 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
   const [vehicleCount, setVehicleCount] = React.useState("")
   const [isLocating, setIsLocating] = React.useState(false)
   const [isSearching, setIsSearching] = React.useState(false)
+  const [isSubmitting, setIsSubmitting] = React.useState(false)
+
+  const createReport = useMutation(api.reports.createReport)
 
   const inputRef = React.useRef<HTMLInputElement>(null)
   const suggestionsRef = React.useRef<HTMLDivElement>(null)
@@ -325,29 +330,44 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
     )
   }
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
-    // Handle form submission (skeleton - just close modal)
-    console.log({
-      address,
-      coordinates,
-      isVerified,
-      dateTime,
-      details,
-      agentCount,
-      vehicleCount,
-    })
-    setOpen(false)
-    // Reset form
-    setAddress("")
-    setCoordinates(null)
-    setIsVerified(false)
-    setSuggestions([])
-    setShowSuggestions(false)
-    setIsSearching(false)
-    setDetails("")
-    setAgentCount("")
-    setVehicleCount("")
+    
+    if (!coordinates) {
+      alert("Please select a valid location")
+      return
+    }
+
+    setIsSubmitting(true)
+    
+    try {
+      await createReport({
+        address,
+        longitude: coordinates[0],
+        latitude: coordinates[1],
+        dateTime,
+        details: details || undefined,
+        agentCount: agentCount ? parseInt(agentCount, 10) : undefined,
+        vehicleCount: vehicleCount ? parseInt(vehicleCount, 10) : undefined,
+      })
+      
+      setOpen(false)
+      // Reset form
+      setAddress("")
+      setCoordinates(null)
+      setIsVerified(false)
+      setSuggestions([])
+      setShowSuggestions(false)
+      setIsSearching(false)
+      setDetails("")
+      setAgentCount("")
+      setVehicleCount("")
+    } catch (error) {
+      console.error("Failed to submit report:", error)
+      alert("Failed to submit report. Please try again.")
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -561,10 +581,13 @@ export function ReportIceModal({ children }: ReportIceModalProps) {
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
+              disabled={isSubmitting}
             >
               Cancel
             </Button>
-            <Button type="submit">Submit Report</Button>
+            <Button type="submit" disabled={isSubmitting || !coordinates}>
+              {isSubmitting ? "Submitting..." : "Submit Report"}
+            </Button>
           </DialogFooter>
         </form>
       </DialogContent>
